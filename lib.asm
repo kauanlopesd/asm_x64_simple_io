@@ -48,6 +48,45 @@ print_newline:
   call print_char
   ret
 
+print_uint: ; (unsignedNum: rdi)
+  push r14
+  mov r14, 10
+
+  push 0
+  mov rsi, rsp
+  sub rsp, 24
+  mov rax, rdi
+.loop:
+  xor rdx, rdx
+  div r14
+  or dl, 0x30
+
+  cmp rsi, rsp
+  jl .end
+
+  mov byte[rsi], dl
+
+  test rax, rax
+  jz .end
+  dec rsi
+  jmp .loop
+.end:
+  mov rdi, rsi
+  call print_string
+  add rsp, 32
+  pop r14
+  ret
+
+print_int: ; (signedNum: rdi)
+  test rdi, rdi
+  jns print_uint
+  push rdi
+  mov rdi, '-'
+  call print_char
+  pop rdi
+  neg rdi
+  jmp print_uint
+
 _start:
   xor rdi, rdi
   call exit
