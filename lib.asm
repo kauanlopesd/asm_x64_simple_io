@@ -87,6 +87,81 @@ print_int: ; (signedNum: rdi)
   neg rdi
   jmp print_uint
 
+read_char: ; () -> charCode: rax
+  xor rax, rax
+  xor rdi, rdi ; stdin
+  push 0
+  mov rsi, rsp
+  mov rdx, 1
+  syscall
+  
+  test rax, rax
+  jnz .get_char
+  pop rsi
+  xor rax, rax
+  ret
+.get_char:
+  mov rax, [rsi]
+  pop rsi
+  ret
+
+read_word: ; (buffer: rdi, size: rsi) -> (buffer: rax, wordSize: rdx)
+  push r14
+  push r15
+  xor r14, r14
+  mov r15, rsi
+  dec r15
+.get_first_char:
+  push rdi
+  call read_char
+  pop rdi
+  cmp al, 0x20
+  je .get_first_char
+  cmp al, 0xA
+  je .get_first_char
+  cmp al, 0xD
+  je .get_first_char
+  cmp al, 0x9
+  je .get_first_char
+  test al, al
+  jz .no_word
+.write:
+  mov byte[rdi + r14], al
+  inc r14
+.get_chars:
+  push rdi 
+  call read_char
+  pop rdi
+  cmp al, 0x20
+  je .end
+  cmp al, 0xA
+  je .end
+  cmp al, 0xD
+  je .end
+  cmp al, 0x9
+  je .end
+  test al, al
+  jz .end
+  
+  cmp r14, r15
+  je .no_word
+
+  jmp .write
+.no_word:
+  xor rax, rax
+  xor rdx, rdx
+  pop r15
+  pop r14
+  ret
+.end:
+  mov byte[rdi + r14], 0
+  mov rax, rdi
+  mov rdx, r14
+  pop r15
+  pop r14 
+  ret
+
 _start:
   xor rdi, rdi
   call exit
+
