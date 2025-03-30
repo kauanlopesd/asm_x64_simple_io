@@ -6,6 +6,12 @@ global string_length
 global print_string
 global print_char
 global print_newline
+global print_int
+global print_uint
+global read_char
+global read_word
+global parse_uint
+global parse_int
 global _start
 
 exit: ; (statusCode: rdi)
@@ -159,6 +165,39 @@ read_word: ; (buffer: rdi, size: rsi) -> (buffer: rax, wordSize: rdx)
   mov rdx, r14
   pop r15
   pop r14 
+  ret
+
+parse_uint: ; (buffer: rdi) -> (unsignedNum: rax, length: rdx)
+  mov r8, 10
+  xor rax, rax
+  xor rcx, rcx
+.loop:
+  movzx r9, byte[rdi + rcx]
+  cmp r9b, 0x30
+  jb .end
+  cmp r9b, 0x49
+  ja .end
+
+  and r9d, 0xf
+  xor rdx, rdx
+  mul r8
+
+  add rax, r9
+  inc rcx
+  jmp .loop
+.end:
+  mov rdx, rcx
+  ret
+
+parse_int: ; (buffer: rdi) -> (signedNum: rax, length: rdx)
+  cmp byte[rdi], '-'
+  je .signed
+  jmp parse_uint
+.signed:
+  inc rdi
+  call parse_uint
+  neg rax
+  inc rdx
   ret
 
 _start:
