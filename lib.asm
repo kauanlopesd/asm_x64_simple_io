@@ -12,6 +12,8 @@ global read_char
 global read_word
 global parse_uint
 global parse_int
+global string_equals
+global string_copy
 global _start
 
 exit: ; (statusCode: rdi)
@@ -198,6 +200,45 @@ parse_int: ; (buffer: rdi) -> (signedNum: rax, length: rdx)
   call parse_uint
   neg rax
   inc rdx
+  ret
+
+string_equals: ; (buffer: rdi, otherBuffer: rsi) -> isEqual: rax
+  xor rcx, rcx
+.loop:
+  movzx r8, byte[rsi + rcx]
+  cmp byte[rdi + rcx], r8b
+  jne .not_equal
+
+  cmp byte[rdi + rcx], 0
+  jz .equal
+  inc rcx
+  jmp .loop
+.not_equal:
+  xor rax, rax
+  ret
+.equal:
+  mov rax, 1
+  ret
+
+string_copy: ; (buffer: rdi, copyBuffer: rsi, copyBufferSize: rdx)
+  xor rcx, rcx
+.loop:
+  movzx r8, byte[rdi + rcx]
+  cmp rcx, rdx
+  je .no_space
+
+  mov byte[rsi + rcx], r8b
+  inc rcx
+  cmp r8b, 0
+  je .end
+  jmp .loop
+.no_space:
+  xor rax, rax
+  xor rdx, rdx
+  ret
+.end:
+  mov rax, rsi
+  mov rdx, rcx
   ret
 
 _start:
