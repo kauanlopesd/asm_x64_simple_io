@@ -14,7 +14,6 @@ global parse_uint
 global parse_int
 global string_equals
 global string_copy
-global _start
 
 exit: ; (statusCode: rdi)
   mov rax, 60
@@ -240,8 +239,4 @@ string_copy: ; (buffer: rdi, copyBuffer: rsi, copyBufferSize: rdx)
   mov rax, rsi
   mov rdx, rcx
   ret
-
-_start:
-  xor rdi, rdi
-  call exit
 
