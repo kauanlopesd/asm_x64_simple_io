@@ -1,6 +1,6 @@
 ASM = nasm
 ASM_FLAGS = -felf64
-SOURCES = lib.asm
+SOURCES = lib.inc
 OBJECTS = lib.o
 
 LINKER = ld
